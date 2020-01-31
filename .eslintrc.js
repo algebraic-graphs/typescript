@@ -19,7 +19,7 @@ module.exports = {
   ],
   "rules": {
     "@typescript-eslint/adjacent-overload-signatures": "error",
-    "@typescript-eslint/array-type": "error",
+    "@typescript-eslint/array-type": ["error", { "default": "array-simple" }],
     "@typescript-eslint/ban-types": "error",
     "@typescript-eslint/class-name-casing": "error",
     "@typescript-eslint/consistent-type-assertions": "error",
@@ -152,6 +152,8 @@ module.exports = {
     "spaced-comment": "error",
     "use-isnan": "error",
     "valid-typeof": "off",
+    "no-multiple-empty-lines": ["error", { "max": 1 }],
+    "@typescript-eslint/explicit-function-return-type": "off",
     "@typescript-eslint/tslint/config": [
       "error",
       {
