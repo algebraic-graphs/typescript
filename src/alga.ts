@@ -5,7 +5,7 @@ import { fieldNumber } from 'fp-ts/lib/Field';
 import { constant, constTrue, flip, flow, identity, Predicate } from 'fp-ts/lib/function';
 import { Monad1 } from 'fp-ts/lib/Monad';
 import * as S from 'fp-ts/lib/Set';
-import { pipe } from 'fp-ts/lib/pipeable';
+import { pipe, pipeable } from 'fp-ts/lib/pipeable';
 
 type Fn1<A, B> = (a: A) => B;
 type Fn2<A, B, C> = (a: A, b: B) => C;
@@ -51,17 +51,17 @@ declare module 'fp-ts/lib/HKT' {
 
 // Constructors
 
-export const empty = <A>(): Graph<A> => ({ tag: 'Empty' });
-export const vertex = <A>(value: A): Graph<A> => ({ tag: 'Vertex', value });
-export const vertices = <A>(values: A[]): Graph<A> => overlays(values.map(vertex));
-export const overlay = <A>(left: Graph<A>, right: Graph<A>): Graph<A> => ({ tag: 'Overlay', left, right });
-export const overlays = <A>(gs: Array<Graph<A>>): Graph<A> => gs.reduce(overlay, empty());
-export const connect = <A>(from: Graph<A>, to: Graph<A>): Graph<A> => ({ tag: 'Connect', from, to });
-export const connects = <A>(gs: Array<Graph<A>>): Graph<A> => gs.reduce(connect, empty());
-export const edge = <A>(x: A, y: A): Graph<A> => connect(vertex(x), vertex(y));
-export const edges = <A>(es: Array<[A, A]>): Graph<A> => overlays(es.map(([x, y]) => edge(x, y)));
+const empty = <A>(): Graph<A> => ({ tag: 'Empty' });
+const vertex = <A>(value: A): Graph<A> => ({ tag: 'Vertex', value });
+const vertices = <A>(values: A[]): Graph<A> => overlays(values.map(vertex));
+const overlay = <A>(left: Graph<A>, right: Graph<A>): Graph<A> => ({ tag: 'Overlay', left, right });
+const overlays = <A>(gs: Array<Graph<A>>): Graph<A> => gs.reduce(overlay, empty());
+const connect = <A>(from: Graph<A>, to: Graph<A>): Graph<A> => ({ tag: 'Connect', from, to });
+const connects = <A>(gs: Array<Graph<A>>): Graph<A> => gs.reduce(connect, empty());
+const edge = <A>(x: A, y: A): Graph<A> => connect(vertex(x), vertex(y));
+const edges = <A>(es: Array<[A, A]>): Graph<A> => overlays(es.map(([x, y]) => edge(x, y)));
 
-export const foldg = <A, B>(
+const foldg = <A, B>(
   onEdge: B,
   onVertex: Fn1<A, B>,
   onOverlay: Fn2<B, B, B>,
@@ -175,6 +175,17 @@ export const getInstanceFor = <A>(eqA: Eq<A>) => {
     foldg<A, Graph<A>>(empty(), vertex, _simple(overlay), _simple(connect))(g);
 
   return {
+    ...pipeable(graph),
+    empty,
+    vertex,
+    vertices,
+    overlay,
+    overlays,
+    connect,
+    connects,
+    edge,
+    edges,
+    foldg,
     vertexSet,
     edgeSet,
     hasVertex,
@@ -186,7 +197,7 @@ export const getInstanceFor = <A>(eqA: Eq<A>) => {
     induce,
     transpose,
     simplify,
-  };
+  } as const;
 };
 
 export const graph: Monad1<'Graph'> & Alternative1<'Graph'> = {
