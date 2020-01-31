@@ -8,9 +8,8 @@ import { Monad1 } from 'fp-ts/lib/Monad';
 type Fn1<A, B> = (a: A) => B;
 type Fn2<A, B, C> = (a: A, b: B) => C;
 
-const and = booleanAlgebraBoolean.meet;
-const or = booleanAlgebraBoolean.join;
-const add = fieldNumber.add;
+const { meet: and, join: or } = booleanAlgebraBoolean;
+const { add } = fieldNumber;
 
 export interface Vertex<A> {
   tag: 'Vertex';
