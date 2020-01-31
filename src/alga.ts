@@ -40,6 +40,9 @@ export type Graph<A> =
   | Overlay<A>
   | Connect<A>;
 
+export const URI = 'Graph';
+export type URI = typeof URI;
+
 declare module 'fp-ts/lib/HKT' {
   interface URItoKind<A> {
     Graph: Graph<A>;
@@ -187,7 +190,7 @@ export const getInstanceFor = <A>(eqA: Eq<A>) => {
 };
 
 export const graph: Monad1<'Graph'> & Alternative1<'Graph'> = {
-  URI: 'Graph',
+  URI,
   map: <A, B>(g: Graph<A>, ab: Fn1<A, B>): Graph<B> => foldg<A, Graph<B>>(
     empty(),
     flow(ab, vertex),
