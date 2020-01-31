@@ -1,0 +1,41 @@
+{
+  "name": "alga-ts",
+  "version": "1.0.0",
+  "description": "Algebraic graphs in TypeScript",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/YBogomolov/alga-ts.git"
+  },
+  "keywords": [
+    "algebraic",
+    "graphs",
+    "fp-ts",
+    "fp",
+    "graph"
+  ],
+  "author": "Yuriy Bogomolov <yuriy.bogomolov@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/YBogomolov/alga-ts/issues"
+  },
+  "homepage": "https://github.com/YBogomolov/alga-ts#readme",
+  "peerDependencies": {
+    "fp-ts": "^2.4.3"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^2.18.0",
+    "@typescript-eslint/eslint-plugin-tslint": "^2.18.0",
+    "@typescript-eslint/parser": "^2.18.0",
+    "eslint": "^6.8.0",
+    "eslint-plugin-import": "^2.20.0",
+    "eslint-plugin-prefer-arrow": "^1.1.7",
+    "fp-ts": "^2.4.3",
+    "tslint": "^6.0.0",
+    "typescript": "^3.7.5"
+  },
+  "dependencies": {}
+}
