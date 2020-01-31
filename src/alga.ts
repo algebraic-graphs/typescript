@@ -89,24 +89,26 @@ export const getInstanceFor = <A>(eqA: Eq<A>) => {
       }
     },
   );
+  const setUnion = S.union(eqAA);
+  const setUnionA = S.union(eqA);
+  const setChain = S.chain(eqAA);
+  const setMap = S.map(eqAA);
 
   const vertexSet: (g: Graph<A>) => Set<A> =
-    foldg(S.empty, a => new Set<A>().add(a), S.union(eqA), S.union(eqA));
+    foldg(S.empty, a => new Set<A>().add(a), setUnionA, setUnionA);
 
   const edgeSet = (g: Graph<A>): Set<[A, A]> => {
-    const _union = S.union(eqAA);
-
     switch (g.tag) {
       case 'Empty':
       case 'Vertex': return S.empty;
-      case 'Overlay': return _union(edgeSet(g.left), edgeSet(g.right));
-      case 'Connect': return _union(
-        _union(edgeSet(g.from), edgeSet(g.to)),
+      case 'Overlay': return setUnion(edgeSet(g.left), edgeSet(g.right));
+      case 'Connect': return setUnion(
+        setUnion(edgeSet(g.from), edgeSet(g.to)),
         pipe(
           vertexSet(g.from),
-          S.chain(eqAA)(x => pipe(
+          setChain(x => pipe(
             vertexSet(g.to),
-            S.map(eqAA)(y => [x, y])),
+            setMap(y => [x, y])),
           ),
         ),
       );
