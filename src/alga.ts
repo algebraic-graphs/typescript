@@ -97,8 +97,7 @@ export const getInstanceFor = <A>(eqA: Eq<A>) => {
   const setChain = S.chain(eqAA);
   const setMap = S.map(eqAA);
 
-  const vertexSet: (g: Graph<A>) => Set<A> =
-    foldg(S.empty, a => new Set<A>().add(a), setUnionA, setUnionA);
+  const vertexSet: (g: Graph<A>) => Set<A> = foldg(S.empty, a => new Set<A>().add(a), setUnionA, setUnionA);
 
   const edgeSet = (g: Graph<A>): Set<[A, A]> => {
     switch (g.tag) {
@@ -118,9 +117,22 @@ export const getInstanceFor = <A>(eqA: Eq<A>) => {
     }
   };
 
-  const hasVertex = (v: A): (g: Graph<A>) => boolean =>
-    foldg<A, boolean>(false, (a) => eqA.equals(v, a), or, or);
+  const hasVertex = (v: A): (g: Graph<A>) => boolean => foldg<A, boolean>(false, (a) => eqA.equals(v, a), or, or);
 
+  const _onOverlay = (left: Fn1<number, number>, right: Fn1<number, number>) => (n: number): number => {
+    switch (left(n)) {
+      case 0: return right(n);
+      case 1: return right(n) === 2 ? 2 : 1;
+      default: return 2;
+    }
+  };
+  const _onConnect = (from: Fn1<number, number>, to: Fn1<number, number>) => (n: number): number => {
+    const res = from(n);
+    switch (res) {
+      case 2: return 2;
+      default: return to(res);
+    }
+  };
   const hasEdge = (edgeFrom: A, edgeTo: A, g: Graph<A>): boolean => {
     const onVertex = (x: A) => (n: number): number => {
       switch (n) {
@@ -128,22 +140,8 @@ export const getInstanceFor = <A>(eqA: Eq<A>) => {
         default: return eqA.equals(edgeTo, x) ? 2 : 1;
       }
     };
-    const onOverlay = (left: Fn1<number, number>, right: Fn1<number, number>) => (n: number): number => {
-      switch (left(n)) {
-        case 0: return right(n);
-        case 1: return right(n) === 2 ? 2 : 1;
-        default: return 2;
-      }
-    };
-    const onConnect = (from: Fn1<number, number>, to: Fn1<number, number>) => (n: number): number => {
-      const res = from(n);
-      switch (res) {
-        case 2: return 2;
-        default: return to(res);
-      }
-    };
 
-    const f = foldg<A, Fn1<number, number>>(identity, onVertex, onOverlay, onConnect)(g);
+    const f = foldg<A, Fn1<number, number>>(identity, onVertex, _onOverlay, _onConnect)(g);
 
     return f(0) === 2;
   };
@@ -159,8 +157,7 @@ export const getInstanceFor = <A>(eqA: Eq<A>) => {
 
   const size = (g: Graph<A>): number => foldg<A, number>(1, constant(1), add, add)(g);
 
-  const transpose = (g: Graph<A>): Graph<A> =>
-    foldg<A, Graph<A>>(empty(), vertex, overlay, flip(connect))(g);
+  const transpose = (g: Graph<A>): Graph<A> => foldg<A, Graph<A>>(empty(), vertex, overlay, flip(connect))(g);
 
   const _simple = (op: Fn2<Graph<A>, Graph<A>, Graph<A>>) => (x: Graph<A>, y: Graph<A>): Graph<A> => {
     const z = op(x, y);
