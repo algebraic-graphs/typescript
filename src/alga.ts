@@ -2,7 +2,7 @@ import { Alternative1 } from 'fp-ts/lib/Alternative';
 import { booleanAlgebraBoolean } from 'fp-ts/lib/BooleanAlgebra';
 import { Eq, getTupleEq, fromEquals } from 'fp-ts/lib/Eq';
 import { fieldNumber } from 'fp-ts/lib/Field';
-import { constant, constTrue, flip, flow, identity, Predicate } from 'fp-ts/lib/function';
+import { constant, constTrue, flip, flow, identity, Predicate, Lazy, constFalse } from 'fp-ts/lib/function';
 import { Monad1 } from 'fp-ts/lib/Monad';
 import * as S from 'fp-ts/lib/Set';
 import { pipe, pipeable } from 'fp-ts/lib/pipeable';
@@ -61,15 +61,15 @@ const connects = <A>(gs: Array<Graph<A>>): Graph<A> => gs.reduce(connect, empty(
 const edge = <A>(x: A, y: A): Graph<A> => connect(vertex(x), vertex(y));
 const edges = <A>(es: Array<[A, A]>): Graph<A> => overlays(es.map(([x, y]) => edge(x, y)));
 
-const foldg = <A, B>(
-  onEdge: B,
+const fold = <A, B>(
+  onEdge: Lazy<B>,
   onVertex: Fn1<A, B>,
   onOverlay: Fn2<B, B, B>,
   onConnect: Fn2<B, B, B>,
 ): (g: Graph<A>) => B => {
   const go = (g: Graph<A>): B => {
     switch (g.tag) {
-      case 'Empty': return onEdge;
+      case 'Empty': return onEdge();
       case 'Vertex': return onVertex(g.value);
       case 'Overlay': return onOverlay(go(g.left), go(g.right));
       case 'Connect': return onConnect(go(g.from), go(g.to));
@@ -96,8 +96,11 @@ export const getInstanceFor = <A>(eqA: Eq<A>) => {
   const setUnionA = S.union(eqA);
   const setChain = S.chain(eqAA);
   const setMap = S.map(eqAA);
+  const const1 = constant(1);
+  const constId = constant(identity);
+  const constSet = constant(S.empty);
 
-  const vertexSet: (g: Graph<A>) => Set<A> = foldg(S.empty, a => new Set<A>().add(a), setUnionA, setUnionA);
+  const vertexSet: (g: Graph<A>) => Set<A> = fold(constSet, S.singleton, setUnionA, setUnionA);
 
   const edgeSet = (g: Graph<A>): Set<[A, A]> => {
     switch (g.tag) {
@@ -117,7 +120,7 @@ export const getInstanceFor = <A>(eqA: Eq<A>) => {
     }
   };
 
-  const hasVertex = (v: A): (g: Graph<A>) => boolean => foldg<A, boolean>(false, (a) => eqA.equals(v, a), or, or);
+  const hasVertex = (v: A): (g: Graph<A>) => boolean => fold<A, boolean>(constFalse, (a) => eqA.equals(v, a), or, or);
 
   const _onOverlay = (left: Fn1<number, number>, right: Fn1<number, number>) => (n: number): number => {
     switch (left(n)) {
@@ -141,7 +144,7 @@ export const getInstanceFor = <A>(eqA: Eq<A>) => {
       }
     };
 
-    const f = foldg<A, Fn1<number, number>>(identity, onVertex, _onOverlay, _onConnect)(g);
+    const f = fold<A, Fn1<number, number>>(constId, onVertex, _onOverlay, _onConnect)(g);
 
     return f(0) === 2;
   };
@@ -153,11 +156,11 @@ export const getInstanceFor = <A>(eqA: Eq<A>) => {
   const splitVertex = (v: A, vs: A[]) => (g: Graph<A>): Graph<A> =>
     graph.chain(g, a => eqA.equals(v, a) ? vertices(vs) : vertex(a));
 
-  const isEmpty = (g: Graph<A>): boolean => foldg<A, boolean>(true, constTrue, and, and)(g);
+  const isEmpty = (g: Graph<A>): boolean => fold<A, boolean>(constTrue, constTrue, and, and)(g);
 
-  const size = (g: Graph<A>): number => foldg<A, number>(1, constant(1), add, add)(g);
+  const size = (g: Graph<A>): number => fold<A, number>(const1, const1, add, add)(g);
 
-  const transpose = (g: Graph<A>): Graph<A> => foldg<A, Graph<A>>(empty(), vertex, overlay, flip(connect))(g);
+  const transpose = (g: Graph<A>): Graph<A> => fold<A, Graph<A>>(empty, vertex, overlay, flip(connect))(g);
 
   const _simple = (op: Fn2<Graph<A>, Graph<A>, Graph<A>>) => (x: Graph<A>, y: Graph<A>): Graph<A> => {
     const z = op(x, y);
@@ -169,7 +172,7 @@ export const getInstanceFor = <A>(eqA: Eq<A>) => {
   };
 
   const simplify = (g: Graph<A>): Graph<A> =>
-    foldg<A, Graph<A>>(empty(), vertex, _simple(overlay), _simple(connect))(g);
+    fold<A, Graph<A>>(empty, vertex, _simple(overlay), _simple(connect))(g);
 
   return {
     ...pipeable(graph),
@@ -182,7 +185,7 @@ export const getInstanceFor = <A>(eqA: Eq<A>) => {
     connects,
     edge,
     edges,
-    foldg,
+    foldg: fold,
     vertexSet,
     edgeSet,
     hasVertex,
@@ -199,22 +202,22 @@ export const getInstanceFor = <A>(eqA: Eq<A>) => {
 
 export const graph: Monad1<'Graph'> & Alternative1<'Graph'> = {
   URI,
-  map: <A, B>(g: Graph<A>, ab: Fn1<A, B>): Graph<B> => foldg<A, Graph<B>>(
-    empty(),
+  map: <A, B>(g: Graph<A>, ab: Fn1<A, B>): Graph<B> => fold<A, Graph<B>>(
+    empty,
     flow(ab, vertex),
     overlay,
     connect,
   )(g),
   of: vertex,
-  ap: <A, B>(gab: Graph<Fn1<A, B>>, ga: Graph<A>): Graph<B> => foldg<Fn1<A, B>, Graph<B>>(
-    empty(),
-    (ab) => foldg<A, Graph<B>>(empty(), flow(ab, vertex), overlay, connect)(ga),
+  ap: <A, B>(gab: Graph<Fn1<A, B>>, ga: Graph<A>): Graph<B> => fold<Fn1<A, B>, Graph<B>>(
+    empty,
+    (ab) => fold<A, Graph<B>>(empty, flow(ab, vertex), overlay, connect)(ga),
     overlay,
     connect,
   )(gab),
-  chain: <A, B>(ga: Graph<A>, f: Fn1<A, Graph<B>>): Graph<B> => foldg<A, Graph<B>>(
-    empty(),
-    (a) => foldg<B, Graph<B>>(empty<B>(), vertex, overlay, connect)(f(a)),
+  chain: <A, B>(ga: Graph<A>, f: Fn1<A, Graph<B>>): Graph<B> => fold<A, Graph<B>>(
+    empty,
+    (a) => fold<B, Graph<B>>(empty, vertex, overlay, connect)(f(a)),
     overlay,
     connect,
   )(ga),
