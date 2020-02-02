@@ -185,7 +185,7 @@ export const getInstanceFor = <A>(eqA: Eq<A>) => {
     connects,
     edge,
     edges,
-    foldg: fold,
+    fold,
     vertexSet,
     edgeSet,
     hasVertex,
