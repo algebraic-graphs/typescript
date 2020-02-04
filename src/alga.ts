@@ -62,14 +62,14 @@ const edge = <A>(x: A, y: A): Graph<A> => connect(vertex(x), vertex(y));
 const edges = <A>(es: Array<[A, A]>): Graph<A> => overlays(es.map(([x, y]) => edge(x, y)));
 
 const fold = <A, B>(
-  onEdge: Lazy<B>,
+  onEmpty: Lazy<B>,
   onVertex: Fn1<A, B>,
   onOverlay: Fn2<B, B, B>,
   onConnect: Fn2<B, B, B>,
 ): (g: Graph<A>) => B => {
   const go = (g: Graph<A>): B => {
     switch (g.tag) {
-      case 'Empty': return onEdge();
+      case 'Empty': return onEmpty();
       case 'Vertex': return onVertex(g.value);
       case 'Overlay': return onOverlay(go(g.left), go(g.right));
       case 'Connect': return onConnect(go(g.from), go(g.to));
