@@ -8,7 +8,7 @@
 
 > See [this Haskell Symposium paper](https://github.com/snowleopard/alga-paper) and the corresponding [talk](https://www.youtube.com/watch?v=EdQGLewU-8k) for the motivation behind the library, the underlying theory and implementation details. There is also a [Haskell eXchange talk](https://skillsmatter.com/skillscasts/10635-algebraic-graphs), and a [tutorial](https://nobrakal.github.io/alga-tutorial) by Alexandre Moine.
 
-**N.B.** Please note that this project is WIP, so use it at your own descretion.
+**N.B.** Please note that this project is WIP, so use it at your own discretion.
 
 ## Installation
 
