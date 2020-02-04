@@ -2,9 +2,14 @@
   "name": "alga-ts",
   "version": "1.0.0",
   "description": "Algebraic graphs in TypeScript",
-  "main": "index.js",
+  "files": [
+    "lib"
+  ],
+  "main": "lib/alga.js",
+  "typings": "lib/alga.d.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest --passWithNoTests",
+    "build": "rm -rf ./lib && tsc --build tsconfig.production.json"
   },
   "repository": {
     "type": "git",
