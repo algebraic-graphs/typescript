@@ -1,0 +1,13 @@
+language: node_js
+node_js:
+- '12.13'
+script: npm run build
+deploy:
+  provider: npm
+  email: yuriy.bogomolov@gmail.com
+  edge: true
+  api_key:
+    secure: JvRHdc7WyhA7ahqXVEM35nA//QQtOH1DBdEp1tWqD8bJMbGt+PgupO2nu/R0RFqkfpvfjn0ldYY3RQK7DPE672p70RDiCK15I4MXNEa+X45itIHPN0qqjMx8ZTTogzCuf7aPdRDU9+Dra8MFF9RhJW29xNpjqDUfDz2ECGhv1aHyXIj8puRYYoQb9cULvfvIhsUAT8gRIysHdhgC/FeN0bL47L1d3vgRvrS52LclpprmznPCF+KWvHJ6mmLLN5J7tagIBOTGG7EU6qJjePRNtzxhFEREyjv4YFHjgKiSV3emafm1Wl78bhkJXg8AmXsUERxHwrityaI9dYbTOzZ0vBZtdpZU56JFcC1pV9klhDzXwncWS4lTYoSocEcP2DGDLe693QEQoSRRacVsWtqwFoS8E2jN2pwpyaAhTKWJPhbXpxqQLPXAbQy8ZNn6HT61l+5IHk6xco+f/ND2yT95e2yODgyQs4kUoU+8xjHnZVWEqRixc2avFBjZ1s9gft8JkjKJEoZ5hyVPMLMB2n3sbXCfZpTgCQMD+Y8ejlLMxnTppKY6eYgSf9HamDODVo6UHjP4jn0KBr7mKRe6imnrvBVKeGJTLDvHu5tRtb8iyaf9Se876Sze2Kr7ZcUaZJ9fUbCUoOUzeRslfPQMNd4HY/YVxYtqRvEXwXbLHCmoNwM=
+  cleanup: false
+  on:
+    tags: true
