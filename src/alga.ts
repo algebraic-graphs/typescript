@@ -1,11 +1,11 @@
 import { Alternative1 } from 'fp-ts/lib/Alternative';
 import { booleanAlgebraBoolean } from 'fp-ts/lib/BooleanAlgebra';
-import { Eq, getTupleEq, fromEquals } from 'fp-ts/lib/Eq';
+import { Eq, fromEquals, getTupleEq } from 'fp-ts/lib/Eq';
 import { fieldNumber } from 'fp-ts/lib/Field';
-import { constant, constTrue, flip, flow, identity, Predicate, Lazy, constFalse } from 'fp-ts/lib/function';
+import { constant, constFalse, constTrue, flip, flow, identity, Lazy, Predicate } from 'fp-ts/lib/function';
 import { Monad1 } from 'fp-ts/lib/Monad';
-import * as S from 'fp-ts/lib/Set';
 import { pipe, pipeable } from 'fp-ts/lib/pipeable';
+import * as S from 'fp-ts/lib/Set';
 
 type Fn1<A, B> = (a: A) => B;
 type Fn2<A, B, C> = (a: A, b: B) => C;
@@ -55,11 +55,11 @@ const empty = <A>(): Graph<A> => ({ tag: 'Empty' });
 const vertex = <A>(value: A): Graph<A> => ({ tag: 'Vertex', value });
 const vertices = <A>(values: A[]): Graph<A> => overlays(values.map(vertex));
 const overlay = <A>(left: Graph<A>, right: Graph<A>): Graph<A> => ({ tag: 'Overlay', left, right });
-const overlays = <A>(gs: Array<Graph<A>>): Graph<A> => gs.reduce(overlay, empty());
+const overlays = <A>(gs: Graph<A>[]): Graph<A> => gs.reduce(overlay, empty());
 const connect = <A>(from: Graph<A>, to: Graph<A>): Graph<A> => ({ tag: 'Connect', from, to });
-const connects = <A>(gs: Array<Graph<A>>): Graph<A> => gs.reduce(connect, empty());
+const connects = <A>(gs: Graph<A>[]): Graph<A> => gs.reduce(connect, empty());
 const edge = <A>(x: A, y: A): Graph<A> => connect(vertex(x), vertex(y));
-const edges = <A>(es: Array<[A, A]>): Graph<A> => overlays(es.map(([x, y]) => edge(x, y)));
+const edges = <A>(es: [A, A][]): Graph<A> => overlays(es.map(([x, y]) => edge(x, y)));
 const clique = <A>(values: A[]): Graph<A> => connects(values.map(vertex));
 
 const fold = <A, B>(
@@ -150,7 +150,7 @@ export const getInstanceFor = <A>(eqA: Eq<A>) => {
     return f(0) === 2;
   };
 
-  const induce = <A>(p: Predicate<A>) => (g: Graph<A>): Graph<A> => graph.chain(g, a => p(a) ? vertex(a) : empty());
+  const induce = (p: Predicate<A>) => (g: Graph<A>): Graph<A> => graph.chain(g, a => p(a) ? vertex(a) : empty());
 
   const removeVertex = (v: A): (g: Graph<A>) => Graph<A> => induce(a => !eqA.equals(v, a));
 
