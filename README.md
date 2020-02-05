@@ -1,7 +1,7 @@
 # Algebraic graphs implementation in TypeScript
 
 [![npm](https://img.shields.io/npm/v/alga-ts.svg)](https://www.npmjs.com/package/alga-ts)
-[![Build Status](https://travis-ci.org/YBogomolov/alga-ts.svg)](https://travis-ci.org/YBogomolov/alga-ts)
+[![Build Status](https://travis-ci.org/algebraic-graphs/typescript.svg)](https://travis-ci.org/algebraic-graphs/typescript)
 
 
 `alga-ts` is a library for algebraic construction and manipulation of graphs in TypeScript. This is a TypeScript port of [alga](https://github.com/snowleopard/alga) and [alga-scala](https://github.com/algebraic-graphs/scala).
