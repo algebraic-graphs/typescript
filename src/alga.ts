@@ -60,6 +60,7 @@ const connect = <A>(from: Graph<A>, to: Graph<A>): Graph<A> => ({ tag: 'Connect'
 const connects = <A>(gs: Array<Graph<A>>): Graph<A> => gs.reduce(connect, empty());
 const edge = <A>(x: A, y: A): Graph<A> => connect(vertex(x), vertex(y));
 const edges = <A>(es: Array<[A, A]>): Graph<A> => overlays(es.map(([x, y]) => edge(x, y)));
+const clique = <A>(values: A[]): Graph<A> => connects(values.map(vertex));
 
 const fold = <A, B>(
   onEmpty: Lazy<B>,
@@ -185,6 +186,7 @@ export const getInstanceFor = <A>(eqA: Eq<A>) => {
     connects,
     edge,
     edges,
+    clique,
     fold,
     vertexSet,
     edgeSet,
