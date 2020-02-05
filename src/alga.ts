@@ -177,6 +177,7 @@ export const getInstanceFor = <A>(eqA: Eq<A>) => {
 
   return {
     ...pipeable(graph),
+    eqGraph: eqGraphA,
     empty,
     vertex,
     vertices,
