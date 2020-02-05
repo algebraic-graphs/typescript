@@ -17,7 +17,9 @@
     "alwaysStrict": true,
     "moduleResolution": "node",
     "declaration": true,
-    "types": [],
+    "types": [
+      "jest"
+    ],
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true
   },
