@@ -36,6 +36,7 @@
     "@types/jest": "^25.1.1",
     "fast-check": "^1.22.1",
     "fp-ts": "^2.4.3",
+    "husky": "^4.2.1",
     "jest": "^25.1.0",
     "ts-jest": "^25.2.0",
     "tslint": "^6.0.0",
@@ -45,5 +46,10 @@
   "jest": {
     "testEnvironment": "jsdom",
     "preset": "ts-jest"
+  },
+  "husky": {
+    "hooks": {
+      "pre-push": "npm test"
+    }
   }
 }
