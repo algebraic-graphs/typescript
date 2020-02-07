@@ -182,7 +182,7 @@ export const getInstanceFor = <A>(eqA: Eq<A>) => {
   const toAdjacencyMap = (g: Graph<A>) => fold<A, Map<A, Set<A>>>(
     constant(M.empty),
     x => M.singleton(x, S.empty),
-    (x, y) => new Map([...x.entries(), ...y.entries()]),
+    monoidMap.concat,
     (x, y) => {
       const productEdges = new Map<A, Set<A>>();
 
