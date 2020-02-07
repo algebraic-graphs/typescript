@@ -5,6 +5,7 @@ import { fieldNumber } from 'fp-ts/lib/Field';
 import { constant, constFalse, constTrue, flip, flow, identity, Lazy, Predicate } from 'fp-ts/lib/function';
 import * as M from 'fp-ts/lib/Map';
 import { Monad1 } from 'fp-ts/lib/Monad';
+import * as Mon from 'fp-ts/lib/Monoid';
 import { pipe, pipeable } from 'fp-ts/lib/pipeable';
 import * as S from 'fp-ts/lib/Set';
 
@@ -190,7 +191,7 @@ export const getInstanceFor = <A>(eqA: Eq<A>) => {
         productEdges.set(key, new Set(ys));
       }
 
-      return monoidMap.concat(monoidMap.concat(x, y), productEdges);
+      return Mon.fold(monoidMap)([x, y, productEdges]);
     },
   )(g);
 
