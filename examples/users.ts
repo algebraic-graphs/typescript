@@ -1,5 +1,6 @@
-import { getStructEq, eqNumber, eqString } from 'fp-ts/lib/Eq';
+import { eqNumber, eqString, getStructEq } from 'fp-ts/lib/Eq';
 import { pipe } from 'fp-ts/lib/pipeable';
+
 import { getInstanceFor } from '../src/alga';
 
 interface User {
