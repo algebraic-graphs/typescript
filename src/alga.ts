@@ -3,6 +3,7 @@ import { booleanAlgebraBoolean } from 'fp-ts/lib/BooleanAlgebra';
 import { Eq, fromEquals, getTupleEq } from 'fp-ts/lib/Eq';
 import { fieldNumber } from 'fp-ts/lib/Field';
 import { constant, constFalse, constTrue, flip, flow, identity, Lazy, Predicate } from 'fp-ts/lib/function';
+import * as M from 'fp-ts/lib/Map';
 import { Monad1 } from 'fp-ts/lib/Monad';
 import { pipe, pipeable } from 'fp-ts/lib/pipeable';
 import * as S from 'fp-ts/lib/Set';
@@ -175,6 +176,34 @@ export const getInstanceFor = <A>(eqA: Eq<A>) => {
   const simplify = (g: Graph<A>): Graph<A> =>
     fold<A, Graph<A>>(empty, vertex, _simple(overlay), _simple(connect))(g);
 
+  const _unionSet = (...sets: Set<A>[]): Set<A> => {
+    const result = new Set<A>();
+
+    for (const set of sets) {
+      for (const entry of set) {
+        result.add(entry);
+      }
+    }
+
+    return result;
+  };
+
+  const toAdjacencyMap = (g: Graph<A>) => fold<A, Map<A, Set<A>>>(
+    constant(M.empty),
+    x => M.singleton(x, S.empty),
+    (x, y) => new Map([...x.entries(), ...y.entries()]),
+    (x, y) => {
+      const ys = _unionSet(...y.values());
+      const productEdges = new Map<A, Set<A>>();
+
+      for (const key of x.keys()) {
+        productEdges.set(key, new Set(ys));
+      }
+
+      return new Map([...x.entries(), ...y.entries(), ...productEdges.entries()]);
+    },
+  )(g);
+
   return {
     ...pipeable(graph),
     eqGraph: eqGraphA,
@@ -200,10 +229,11 @@ export const getInstanceFor = <A>(eqA: Eq<A>) => {
     induce,
     transpose,
     simplify,
+    toAdjacencyMap,
   } as const;
 };
 
-export const graph: Monad1<'Graph'> & Alternative1<'Graph'> = {
+export const graph: Monad1<URI> & Alternative1<URI> = {
   URI,
   map: <A, B>(g: Graph<A>, ab: Fn1<A, B>): Graph<B> => fold<A, Graph<B>>(
     empty,
