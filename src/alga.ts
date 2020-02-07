@@ -178,18 +178,6 @@ export const getInstanceFor = <A>(eqA: Eq<A>) => {
   const simplify = (g: Graph<A>): Graph<A> =>
     fold<A, Graph<A>>(empty, vertex, _simple(overlay), _simple(connect))(g);
 
-  const _unionSet = (...sets: Set<A>[]): Set<A> => {
-    const result = new Set<A>();
-
-    for (const set of sets) {
-      for (const entry of set) {
-        result.add(entry);
-      }
-    }
-
-    return result;
-  };
-
   const toAdjacencyMap = (g: Graph<A>) => fold<A, Map<A, Set<A>>>(
     constant(M.empty),
     x => M.singleton(x, S.empty),
