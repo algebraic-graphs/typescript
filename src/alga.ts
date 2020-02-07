@@ -101,6 +101,8 @@ export const getInstanceFor = <A>(eqA: Eq<A>) => {
   const const1 = constant(1);
   const constId = constant(identity);
   const constSet = constant(S.empty);
+  const monoidSet = S.getUnionMonoid(eqA);
+  const monoidMap = M.getMonoid(eqA, monoidSet);
 
   const vertexSet: (g: Graph<A>) => Set<A> = fold(constSet, S.singleton, setUnionA, setUnionA);
 
@@ -193,14 +195,14 @@ export const getInstanceFor = <A>(eqA: Eq<A>) => {
     x => M.singleton(x, S.empty),
     (x, y) => new Map([...x.entries(), ...y.entries()]),
     (x, y) => {
-      const ys = _unionSet(...y.values());
+      const ys = new Set(y.keys());
       const productEdges = new Map<A, Set<A>>();
 
       for (const key of x.keys()) {
         productEdges.set(key, new Set(ys));
       }
 
-      return new Map([...x.entries(), ...y.entries(), ...productEdges.entries()]);
+      return monoidMap.concat(monoidMap.concat(x, y), productEdges);
     },
   )(g);
 
