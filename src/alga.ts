@@ -184,11 +184,10 @@ export const getInstanceFor = <A>(eqA: Eq<A>) => {
     x => M.singleton(x, S.empty),
     (x, y) => new Map([...x.entries(), ...y.entries()]),
     (x, y) => {
-      const ys = new Set(y.keys());
       const productEdges = new Map<A, Set<A>>();
 
       for (const key of x.keys()) {
-        productEdges.set(key, new Set(ys));
+        productEdges.set(key, new Set(y.keys()));
       }
 
       return Mon.fold(monoidMap)([x, y, productEdges]);
