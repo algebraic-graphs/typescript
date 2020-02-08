@@ -51,6 +51,8 @@ declare module 'fp-ts/lib/HKT' {
   }
 }
 
+export type AdjacencyMap<A> = Map<A, Set<A>>;
+
 // Constructors
 
 const empty = <A>(): Graph<A> => ({ tag: 'Empty' });
@@ -179,7 +181,7 @@ export const getInstanceFor = <A>(eqA: Eq<A>) => {
   const simplify = (g: Graph<A>): Graph<A> =>
     fold<A, Graph<A>>(empty, vertex, _simple(overlay), _simple(connect))(g);
 
-  const toAdjacencyMap = (g: Graph<A>) => fold<A, Map<A, Set<A>>>(
+  const toAdjacencyMap = (g: Graph<A>): AdjacencyMap<A> => fold<A, AdjacencyMap<A>>(
     constant(M.empty),
     x => M.singleton(x, S.empty),
     monoidMap.concat,
