@@ -6,6 +6,7 @@ import { constant, constFalse, constTrue, flip, flow, identity, Lazy, Predicate 
 import * as M from 'fp-ts/lib/Map';
 import { Monad1 } from 'fp-ts/lib/Monad';
 import * as Mon from 'fp-ts/lib/Monoid';
+import { Ord } from 'fp-ts/lib/Ord';
 import { pipe, pipeable } from 'fp-ts/lib/pipeable';
 import * as S from 'fp-ts/lib/Set';
 
@@ -99,7 +100,7 @@ const overlay = <A>(left: Graph<A>, right: Graph<A>): Graph<A> => ({ tag: 'Overl
  * Construct a graph by overlaying a list of subgraphs.
  * @param gs List of graphs to overlay
  */
-const overlays = <A>(gs: Graph<A>[]): Graph<A> => gs.reduce(overlay, empty());
+const overlays = <A>(gs: Array<Graph<A>>): Graph<A> => gs.reduce(overlay, empty());
 
 /**
  * Construct a graph by connecting each vertex of `from` subgraph to each vertex of `to` subgraph
@@ -113,7 +114,7 @@ const connect = <A>(from: Graph<A>, to: Graph<A>): Graph<A> => ({ tag: 'Connect'
  * Construct a graph by connecting a list of subgraphs.
  * @param gs A list of subgraphs
  */
-const connects = <A>(gs: Graph<A>[]): Graph<A> => gs.reduce(connect, empty());
+const connects = <A>(gs: Array<Graph<A>>): Graph<A> => gs.reduce(connect, empty());
 
 /**
  * Construct a graph consisting of a single edge from `x` to `y`.
@@ -126,7 +127,7 @@ const edge = <A>(x: A, y: A): Graph<A> => connect(vertex(x), vertex(y));
  * Construct a graph by connecting each pair of vertices build from the tuple data.
  * @param es List of tuples with values for the source & target vertices
  */
-const edges = <A>(es: [A, A][]): Graph<A> => overlays(es.map(([x, y]) => edge(x, y)));
+const edges = <A>(es: Array<[A, A]>): Graph<A> => overlays(es.map(([x, y]) => edge(x, y)));
 
 /**
  * Constructo a clique from a given vertex values.
@@ -327,6 +328,15 @@ export const getInstanceFor = <A>(eqA: Eq<A>) => {
     },
   );
 
+  const toAdjacencyList = (ordA: Ord<A>) => (g: Graph<A>): Array<[A, A[]]> =>
+    M.toArray(ordA)(M.map(S.toArray(ordA))(toAdjacencyMap(g)));
+
+  const isSubgraph = (parent: Graph<A>) => (subgraph: Graph<A>): boolean => {
+    const eqSubsetA: Eq<Set<A>> = { equals: S.subset(eqA) };
+
+    return M.isSubmap(eqA, eqSubsetA)(toAdjacencyMap(subgraph), toAdjacencyMap(parent));
+  };
+
   return {
     ...pipeable(graph),
     eqGraph: eqGraphA,
@@ -353,6 +363,8 @@ export const getInstanceFor = <A>(eqA: Eq<A>) => {
     transpose,
     simplify,
     toAdjacencyMap,
+    toAdjacencyList,
+    isSubgraph,
   } as const;
 };
 

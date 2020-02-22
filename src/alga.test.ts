@@ -1,5 +1,8 @@
 import * as fc from 'fast-check';
+import { sort } from 'fp-ts/lib/Array';
 import { fromEquals, strictEqual } from 'fp-ts/lib/Eq';
+import { fromCompare } from 'fp-ts/lib/Ord';
+import { fst, snd } from 'fp-ts/lib/Tuple';
 
 import { getInstanceFor } from './alga';
 
@@ -8,10 +11,13 @@ const something = fc.anything().filter(a => a != null && (typeof a !== 'number' 
 
 describe('Algebraic graphs suite', () => {
   const eqAnything = fromEquals(strictEqual);
+  const ordAnything = fromCompare<any>((x, y) => x === y ? 0 : (x < y ? -1 : 1)); // tslint:disable-line:no-any
   const G = getInstanceFor(eqAnything);
 
   describe('Laws', () => {
     it('Overlay is commutative', () => fc.assert(fc.property(something, something, (a, b) => {
+      fc.pre(new Set([a, b]).size === 2);
+
       const va = G.vertex(a);
       const vb = G.vertex(b);
 
@@ -22,6 +28,8 @@ describe('Algebraic graphs suite', () => {
     })));
 
     it('Overlay is associative', () => fc.assert(fc.property(something, something, something, (a, b, c) => {
+      fc.pre(new Set([a, b, c]).size === 3);
+
       const va = G.vertex(a);
       const vb = G.vertex(b);
       const vc = G.vertex(c);
@@ -48,6 +56,8 @@ describe('Algebraic graphs suite', () => {
       })));
 
       it('Associativity', () => fc.assert(fc.property(something, something, something, (a, b, c) => {
+        fc.pre(new Set([a, b, c]).size === 3);
+
         const va = G.vertex(a);
         const vb = G.vertex(b);
         const vc = G.vertex(c);
@@ -60,6 +70,8 @@ describe('Algebraic graphs suite', () => {
     });
 
     it('Connect distributes over Overlay', () => fc.assert(fc.property(something, something, something, (a, b, c) => {
+      fc.pre(new Set([a, b, c]).size === 3);
+
       const va = G.vertex(a);
       const vb = G.vertex(b);
       const vc = G.vertex(c);
@@ -74,6 +86,8 @@ describe('Algebraic graphs suite', () => {
     })));
 
     it('Decomposition', () => fc.assert(fc.property(something, something, something, (a, b, c) => {
+      fc.pre(new Set([a, b, c]).size === 3);
+
       const va = G.vertex(a);
       const vb = G.vertex(b);
       const vc = G.vertex(c);
@@ -88,6 +102,8 @@ describe('Algebraic graphs suite', () => {
 
   describe('Conversion', () => {
     it('toAdjacencyMap', () => fc.assert(fc.property(something, something, something, something, (a, b, c, d) => {
+      fc.pre(new Set([a, b, c, d]).size === 4);
+
       const g = G.connect(G.edge(a, b), G.edge(c, d));
       const am = G.toAdjacencyMap(g);
 
@@ -114,6 +130,30 @@ describe('Algebraic graphs suite', () => {
       const dSet = am.get(d);
       expect(dSet).toBeDefined();
       expect(dSet?.size).toEqual(0);
+    })));
+
+    it('toAdjacencyList', () => fc.assert(fc.property(something, something, something, something, (a, b, c, d) => {
+      fc.pre(new Set([a, b, c, d]).size === 4);
+
+      const args = sort(ordAnything)([a, b, c, d]);
+      const g = G.connect(G.edge(args[0], args[1]), G.edge(args[2], args[3]));
+      const al = G.toAdjacencyList(ordAnything)(g);
+
+      expect(new Set(al.map(fst))).toEqual(new Set(args));
+      expect(new Set(al.map(snd).map(el => el.length))).toEqual(new Set([0, 1, 2, 3]));
+    })));
+  });
+
+  describe('Algorithms', () => {
+    it('isSubgraph', () => fc.assert(fc.property(something, something, something, something, (a, b, c, d) => {
+      fc.pre(new Set([a, b, c, d]).size === 4);
+
+      const parent = G.connect(G.edge(a, b), G.edge(c, d));
+      const subgraph1 = G.overlay(G.edge(b, c), G.edge(c, d));
+      const subgraph2 = G.overlay(G.edge(a, b), G.edge(b, d));
+
+      expect(G.isSubgraph(parent)(subgraph1)).toBeTruthy();
+      expect(G.isSubgraph(parent)(subgraph2)).toBeTruthy();
     })));
   });
 });
