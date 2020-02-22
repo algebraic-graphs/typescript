@@ -100,6 +100,10 @@
     ],
     "max-classes-per-file": false,
     "interface-over-type-literal": false,
-    "newline-before-return": true
+    "newline-before-return": true,
+    "array-type": [
+      true,
+      "array-simple"
+    ]
   }
 }
