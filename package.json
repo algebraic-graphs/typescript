@@ -1,6 +1,6 @@
 {
   "name": "alga-ts",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Algebraic graphs in TypeScript",
   "files": [
     "lib"
